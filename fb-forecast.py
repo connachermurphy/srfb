@@ -11,6 +11,7 @@ from utils.questions import get_latest_question_set, get_question_count
 
 dotenv.load_dotenv()
 
+# TODO: pass as arguments and/or create constants file
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 ANTHROPIC_MODEL = "claude-3-5-haiku-20241022"  # using a lighter model for testing
 # ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
