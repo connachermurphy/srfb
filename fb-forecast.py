@@ -23,13 +23,15 @@ BOOLEAN_COMBOS = [
 ]
 
 command_line_args_expected = [
-    "organization",
+    "file_prefix",
 ]
 command_line_args_provided = sys.argv[1:]
 
 if len(command_line_args_provided) != len(command_line_args_expected):
     print(f"Usage: {sys.argv[0]} {command_line_args_expected}")
     sys.exit(1)
+
+command_line_args = dict(zip(command_line_args_expected, command_line_args_provided))
 
 # Initialize the forecaster
 forecaster = Forecaster(model=ANTHROPIC_MODEL, api_key=ANTHROPIC_API_KEY)
@@ -48,7 +50,7 @@ print(f"Forecast due date: {due_date} ({question_set_name_no_json})")
 os.makedirs(FORECAST_DIR, exist_ok=True)
 
 # Create the forecast file prefix
-file_prefix = f"{FORECAST_DIR}/forecasts_{question_set_name_no_json}"
+file_prefix = f"{FORECAST_DIR}/forecasts_{command_line_args['file_prefix']}_{question_set_name_no_json}"
 
 # Read the forecast file if it exists
 forecast_file = f"{file_prefix}.json"

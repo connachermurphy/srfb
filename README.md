@@ -46,4 +46,4 @@ Target
 
 
 Example usage:
-make fb-forecast organization="Stochastic Radiant"
+make fb-forecast file_prefix="srfb_demo"

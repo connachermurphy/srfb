@@ -1,8 +1,8 @@
 .PHONY: fb-forecast
 
 fb-forecast:
-	@if [ -z "$(organization)" ]; then \
-		echo "Organization is required"; \
+	@if [ -z "$(file_prefix)" ]; then \
+		echo "File prefix is required"; \
 		exit 1; \
 	fi
-	uv run fb.py "$(organization)"
+	uv run fb-forecast.py "$(file_prefix)"
