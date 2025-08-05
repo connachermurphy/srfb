@@ -1,0 +1,14 @@
+[project]
+name = "srfb"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.32.4",
+    "stochastic-radiant",
+    "tqdm>=4.67.1",
+]
+
+[tool.uv.sources]
+stochastic-radiant = { path = "../stochastic-radiant", editable = true }
