@@ -23,6 +23,18 @@ forecast_file = f"{FORECAST_DIR}/forecasts_{command_line_args['file_prefix']}_{c
 with open(forecast_file, "r") as f:
     forecasts = json.load(f)
 
-# TODO: Create the submission file
+# Create submission dictionary
+submission = {
+    "organization": command_line_args["organization"],
+    "model": command_line_args["model"],
+    "model_organization": command_line_args["model_organization"],
+    "question_set": command_line_args["question_set"],
+    "forecasts": forecasts,
+}
 
-# TODO: save the submission file
+# Save the submission file
+with open(
+    f"{FORECAST_DIR}/submission_{command_line_args['file_prefix']}_{command_line_args['question_set']}.json",
+    "w",
+) as f:
+    json.dump(submission, f)
