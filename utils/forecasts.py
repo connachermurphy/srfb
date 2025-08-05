@@ -1,6 +1,5 @@
-from stochastic_radiant.forecaster import Forecaster
-
-from utils.questions import get_question_count
+import json
+import os
 
 BOOLEAN_COMBOS = [
     [1, 1],
@@ -33,148 +32,36 @@ Background: {question["background"]}
     return context
 
 
-def get_question_forecasts(
-    question: dict,
+def update_file(file_prefix: str, forecasts: list[dict]):
+    """
+    Update the forecast file.
+    """
+    forecast_file = f"{file_prefix}.json"
+
+    # Move current forecasts to a backup file
+    backup_file = f"{file_prefix}_backup.json"
+    if os.path.exists(backup_file):
+        os.remove(backup_file)
+    os.rename(forecast_file, backup_file)
+
+    # Save the forecasts
+    with open(forecast_file, "w") as f:
+        json.dump(forecasts, f)
+
+
+def find_all_forecasts(
     forecasts: list[dict],
-    forecaster: Forecaster,
-    due_date: str = None,
+    question_id: str | list[str],
+    resolution_date: str = None,
+    combination: list[int] = None,
 ) -> list[dict]:
     """
-    Get the forecasts for a question.
+    Find all forecasts for a question.
     """
-    question_forecasts = []
-    question_forecasts_missing = []
-
-    num_resolution_dates, num_combinations = get_question_count(question)
-
-    if num_resolution_dates == 1:  # Single resolution date
-        if num_combinations == 1:  # Single resolution date, single combination
-            context = build_context(question, due_date=due_date)
-
-            forecast, rationale = forecaster.forecast(context)
-
-            question_forecasts.append(
-                {
-                    "id": question["id"],
-                    "source": question["source"],
-                    "forecast": forecast,
-                    "resolution_date": None,
-                    "reasoning": rationale,
-                    "direction": None,
-                }
-            )
-        else:  # Single resolution date, multiple combinations
-            # Grab consistuent questions
-            question_id_1 = question["id"][0]
-            question_id_2 = question["id"][1]
-
-            # Extract forecasts for each question
-            forecast_1 = next((f for f in forecasts if f["id"] == question_id_1), None)
-            forecast_2 = next((f for f in forecasts if f["id"] == question_id_2), None)
-
-            forecast_1 = forecast_1["forecast"] if forecast_1 else None
-            forecast_2 = forecast_2["forecast"] if forecast_2 else None
-
-            if forecast_1 is None or forecast_2 is None:
-                # TODO: add more question details
-                question_forecasts_missing.append(
-                    {
-                        "id": question["id"],
-                        "source": question["source"],
-                    }
-                )
-            else:
-                for combo in BOOLEAN_COMBOS:
-                    forecast_1_product = forecast_1 if combo[0] == 1 else 1 - forecast_1
-                    forecast_2_product = forecast_2 if combo[1] == 1 else 1 - forecast_2
-
-                    forecast = forecast_1_product * forecast_2_product
-
-                    question_forecasts.append(
-                        {
-                            "id": question["id"],
-                            "source": question["source"],
-                            "forecast": forecast,
-                            "resolution_date": None,
-                            "reasoning": "Calculated programmatically from constituent forecasts under the assumption that the constituent questions are independent.",
-                            "direction": combo,
-                        }
-                    )
-
-    else:  # Multiple resolution dates
-        for resolution_date in question["resolution_dates"]:
-            if num_combinations == 1:  # Multiple resolution dates, single combination
-                context = build_context(
-                    question, resolution_date=resolution_date, due_date=due_date
-                )
-
-                forecast, rationale = forecaster.forecast(context)
-
-                question_forecasts.append(
-                    {
-                        "id": question["id"],
-                        "source": question["source"],
-                        "forecast": forecast,
-                        "resolution_date": resolution_date,
-                        "reasoning": rationale,
-                        "direction": None,
-                    }
-                )
-            else:  # Multiple resolution dates, multiple combinations
-                # Grab consistuent questions
-                question_id_1 = question["id"][0]
-                question_id_2 = question["id"][1]
-
-                # Extract forecasts for each question
-                forecast_1 = next(
-                    (
-                        f
-                        for f in forecasts
-                        if f["id"] == question_id_1
-                        and f["resolution_date"] == resolution_date
-                    ),
-                    None,
-                )
-                forecast_2 = next(
-                    (
-                        f
-                        for f in forecasts
-                        if f["id"] == question_id_2
-                        and f["resolution_date"] == resolution_date
-                    ),
-                    None,
-                )
-
-                forecast_1 = forecast_1["forecast"] if forecast_1 else None
-                forecast_2 = forecast_2["forecast"] if forecast_2 else None
-
-                if forecast_1 is None or forecast_2 is None:
-                    question_forecasts_missing.append(
-                        {
-                            "id": question["id"],
-                            "source": question["source"],
-                        }
-                    )
-                else:
-                    for combo in BOOLEAN_COMBOS:
-                        forecast_1_product = (
-                            forecast_1 if combo[0] == 1 else 1 - forecast_1
-                        )
-                        forecast_2_product = (
-                            forecast_2 if combo[1] == 1 else 1 - forecast_2
-                        )
-
-                        forecast = forecast_1_product * forecast_2_product
-
-                        forecasts.append(
-                            {
-                                "id": question["id"],
-                                "source": question["source"],
-                                "forecast": forecast,
-                                "resolution_date": None,
-                                "reasoning": "Calculated programmatically from constituent forecasts under the assumption that the constituent questions are independent.",
-                                "direction": combo,
-                            }
-                        )
-
-    return question_forecasts, question_forecasts_missing
+    return [
+        f
+        for f in forecasts
+        if f["id"] == question_id
+        and f["resolution_date"] == resolution_date
+        and f["direction"] == combination
+    ]

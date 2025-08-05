@@ -1,45 +1,34 @@
 # srfb: Stochastic Radiant ForecastBench Submission
+I use [Stochastic Radiant](https://github.com/connachermurphy/stochastic-radiant) to create a submission for [ForecastBench](https://www.forecastbench.org/). Both of these tools are intended for demonstration purposes. However, I plan to continue development of Stochastic Radiant, with associated evaluation in this repo.
 
 ## References
 The ForecastBench Wiki is available [here](https://github.com/forecastingresearch/forecastbench/wiki/How-to-submit-to-ForecastBench).
 
-## Grab the question set
-`get_latest_question_set()` from `utils.questions`.
-
-## Question types
-1. Standard
-1. Combination
-1. Multiple resolution dates
-
-Anything else?
-
-
-Target
-```json
-{
-    "id": {
-        "description": "A unique identifier string given `source`, corresponding to the `id` from the question in the question set that's being forecast. e.g. 'd331f271'. Required.",
-        "type": "string | array<string>"
-    },
-    "source": {
-        "description": "Where the data comes from, corresponding to the `source` from the question in the question set that's being forecast. e.g. 'metaculus'. Required.",
-        "type": "string"
-    },
-    "forecast": {
-        "description": "The forecast. A float in [0,1]. e.g. 0.5. Required.",
-        "type": "number"
-    },
-    "resolution_date": {
-        "description": "The resolution date this forecast corresponds to. e.g. '2025-01-01'. `null` for market questions. Required.",
-        "type": "string | null"
-    },
-    "reasoning": {
-        "description": "The rationale underlying the forecast. e.g. ''. Optional.",
-        "type": "string | null"
-    },
-    "direction": {
-        "description": "If `id` is a string, the value here should be `null`. If `id` has an array value, then this is a forecast on a combination question and the value here should be an array of the same length as `id`. Each entry is an integer in {-1, 1}. If the value is 1, it means the forecast is in the normal direction of the question. If the value is -1, it means the forecast is for the negated question. e.g. if `id` is an array of length 2, where Q1 corresponds to the first entry of the array in `id` and Q2 corresponds to the second entry, to provide the forecast for P(¬Q1 AND Q2), the value for `direction` would be [-1, 1]. All possible values are: [1,1], [-1,1], [1,-1], [-1,-1], corresponding to the 4 Boolean combinations of the two questions in the `id` array. e.g. [1,1]. Default: null. Required.",
-        "type": "array<number> | null"
-    }
-}
+## Usage
+The forecast routine requires a `.env` file in the project root:
 ```
+ANTHROPIC_API_KEY={your_anthropic_api_key}
+```
+Use `fb-forecast` to generate forecasts on the latest question set (`question_set` below). Example usage:
+```bash
+make fb-forecast file_prefix="srfb_demo" model="claude-3-5-haiku-20241022"
+```
+
+Arguments:
+- `file_prefix` controls the output file name (forecasts_`file_prefix`_`question_set`)
+- `model` specifies the model (must be an [Anthropic model](https://docs.anthropic.com/en/docs/about-claude/models/overview), as Stochastic Radiant only supports Antrhopic at present)
+
+Use `fb-prepare` to prepare a ForecastBench submission file. Example usage:
+```bash
+make fb-prepare file_prefix="srfb_demo" question_set="2025-08-03-llm" organization="Stochastic Radiant" model="claude-3-5-haiku-20241022" model_organization="Anthropic"
+```
+
+Arguments:
+- `file_prefix`: Identifier for the forecast files (e.g., "srfb_demo")
+- `question_set`: Name of the question set being forecasted (e.g., "2025-08-03-llm") 
+- `organization`: Your organization name (for the ForecastBench leaderboard)
+- `model`: The model used to generate forecasts
+- `model_organization`: Organization that created the model
+
+## Contributions
+Please contact me if you're interested in contributing. These submission tools and Stochastic Radiant are both in active development.
