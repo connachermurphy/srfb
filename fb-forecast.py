@@ -13,8 +13,6 @@ dotenv.load_dotenv()
 
 # TODO: pass as arguments and/or create constants file
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-ANTHROPIC_MODEL = "claude-3-5-haiku-20241022"  # using a lighter model for testing
-# ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
 FORECAST_DIR = "forecasts"
 BOOLEAN_COMBOS = [
     [1, 1],
@@ -25,6 +23,7 @@ BOOLEAN_COMBOS = [
 
 command_line_args_expected = [
     "file_prefix",
+    "model",
 ]
 command_line_args_provided = sys.argv[1:]
 
@@ -34,8 +33,14 @@ if len(command_line_args_provided) != len(command_line_args_expected):
 
 command_line_args = dict(zip(command_line_args_expected, command_line_args_provided))
 
+# Save command line arguments to a file
+with open(
+    f"{FORECAST_DIR}/command_line_args_{command_line_args['file_prefix']}.json", "w"
+) as f:
+    json.dump(command_line_args, f)
+
 # Initialize the forecaster
-forecaster = Forecaster(model=ANTHROPIC_MODEL, api_key=ANTHROPIC_API_KEY)
+forecaster = Forecaster(model=command_line_args["model"], api_key=ANTHROPIC_API_KEY)
 
 # Query GitHub for the latest question set object
 latest_question_set = get_latest_question_set()
@@ -116,7 +121,7 @@ for i in tqdm(range(num_questions)):
                     )
 
                 except Exception:
-                    print(
+                    tqdm.write(
                         "Error forecasting question, skipping and saving current output"
                     )
                     update_file(file_prefix, forecasts)
@@ -175,7 +180,7 @@ for i in tqdm(range(num_questions)):
                             }
                         )
                     elif len(forecast_1) == 0 or len(forecast_2) == 0:
-                        print(
+                        tqdm.write(
                             f"Missing constituent forecasts for {question_id} on {resolution_date}, skipping."
                         )
                     else:

@@ -5,7 +5,11 @@ fb-forecast:
 		echo "File prefix is required"; \
 		exit 1; \
 	fi
-	uv run fb-forecast.py "$(file_prefix)"
+	@if [ -z "$(model)" ]; then \
+		echo "Model is required"; \
+		exit 1; \
+	fi
+	uv run fb-forecast.py "$(file_prefix)" "$(model)"
 
 fb-prepare:
 	@if [ -z "$(file_prefix)" ]; then \

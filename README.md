@@ -46,6 +46,11 @@ Target
 
 
 Example usage:
-make fb-forecast file_prefix="srfb_demo"
+make fb-forecast file_prefix="srfb_demo" model="claude-3-5-haiku-20241022"
+
+# ANTHROPIC_MODEL =   # using a lighter model for testing
+# ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
+
+
 
 make fb-prepare file_prefix="srfb_demo" question_set="2025-08-03-llm" organization="Stochastic Radiant" model="claude-3-5-haiku-20241022" model_organization="Anthropic"
