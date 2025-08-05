@@ -1,3 +1,6 @@
+import json
+import os
+
 from stochastic_radiant.forecaster import Forecaster
 
 from utils.questions import get_question_count
@@ -178,3 +181,38 @@ def get_question_forecasts(
                         )
 
     return question_forecasts, question_forecasts_missing
+
+
+def update_file(file_prefix: str, forecasts: list[dict]):
+    """
+    Update the forecast file.
+    """
+    forecast_file = f"{file_prefix}.json"
+
+    # Move current forecasts to a backup file
+    backup_file = f"{file_prefix}_backup.json"
+    if os.path.exists(backup_file):
+        os.remove(backup_file)
+    os.rename(forecast_file, backup_file)
+
+    # Save the forecasts
+    with open(forecast_file, "w") as f:
+        json.dump(forecasts, f)
+
+
+def find_all_forecasts(
+    forecasts: list[dict],
+    question_id: str | list[str],
+    resolution_date: str = None,
+    combination: list[int] = None,
+) -> list[dict]:
+    """
+    Find all forecasts for a question.
+    """
+    return [
+        f
+        for f in forecasts
+        if f["id"] == question_id
+        and f["resolution_date"] == resolution_date
+        and f["direction"] == combination
+    ]

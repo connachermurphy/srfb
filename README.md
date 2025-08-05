@@ -43,3 +43,7 @@ Target
     }
 }
 ```
+
+
+Example usage:
+make fb-forecast organization="Stochastic Radiant"
