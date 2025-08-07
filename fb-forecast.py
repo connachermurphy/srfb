@@ -79,6 +79,11 @@ num_questions = len(questions)
 # Save interval
 save_interval = 25
 
+### Debugging: missing components issue ###
+# Create a file for composite forecasts missing components
+missing_forecasts = []
+### End debugging ###
+
 for i in tqdm(range(num_questions)):
     if i % save_interval == 0:
         update_file(file_prefix, forecasts)
@@ -183,6 +188,17 @@ for i in tqdm(range(num_questions)):
                         tqdm.write(
                             f"Missing constituent forecasts for {question_id} on {resolution_date}, skipping."
                         )
+
+                        ### Debugging: missing components issue ###
+                        missing_forecasts.append(
+                            {
+                                "id": question_id,
+                                "source": question["source"],
+                                "resolution_date": resolution_date,
+                                "direction": combination,
+                            }
+                        )
+                        ### End debugging ###
                     else:
                         raise ValueError(
                             f"Multiple forecasts exist for {question_id} on {resolution_date}"
@@ -194,3 +210,12 @@ for i in tqdm(range(num_questions)):
                     raise ValueError(
                         f"Multiple forecasts exist for {question_id} on {resolution_date} with combination {combination}"
                     )
+
+print("Done!")
+
+### Debugging: missing components issue ###
+with open(
+    f"{FORECAST_DIR}/missing_forecasts_{command_line_args['file_prefix']}.json", "w"
+) as f:
+    json.dump(missing_forecasts, f)
+### End debugging ###
