@@ -30,5 +30,14 @@ Arguments:
 - `model`: The model used to generate forecasts
 - `model_organization`: Organization that created the model
 
+Use `fb-post` to post a forecast set to the relevant GCS bucket. Example usage:
+```bash
+make fb-post file_prefix="srfb_demo" question_set="2025-08-03-llm" organization="Stochastic Radiant" N=1 upload_to_gcs=False
+```
+- `file_prefix`: Identifier for the forecast files (e.g., "srfb_demo")
+- `question_set`: Name of the question set being forecasted (e.g., "2025-08-03-llm") 
+- `organization`: Your organization name (for the ForecastBench leaderboard)
+- `N`: the submission number (integer)
+
 ## Contributions
 Please contact me if you're interested in contributing. These submission tools and Stochastic Radiant are both in active development.

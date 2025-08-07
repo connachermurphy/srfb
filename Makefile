@@ -1,4 +1,4 @@
-.PHONY: fb-forecast, fb-prepare
+.PHONY: fb-forecast, fb-prepare, fb-post
 
 fb-forecast:
 	@if [ -z "$(file_prefix)" ]; then \
@@ -33,3 +33,26 @@ fb-prepare:
 		exit 1; \
 	fi
 	uv run fb-prepare.py "$(file_prefix)" "$(question_set)" "$(organization)" "$(model)" "$(model_organization)"
+
+fb-post:
+	@if [ -z "$(file_prefix)" ]; then \
+		echo "File prefix is required"; \
+		exit 1; \
+	fi
+	@if [ -z "$(question_set)" ]; then \
+		echo "Question set is required"; \
+		exit 1; \
+	fi
+	@if [ -z "$(organization)" ]; then \
+		echo "Organization is required"; \
+		exit 1; \
+	fi
+	@if [ -z "$(N)" ]; then \
+		echo "N is required"; \
+		exit 1; \
+	fi
+	@if [ -z "$(upload_to_gcs)" ]; then \
+		echo "Upload to GCS is required (true or false)"; \
+		exit 1; \
+	fi
+	uv run fb-post.py "$(file_prefix)" "$(question_set)" "$(organization)" "$(N)" "$(upload_to_gcs)"
