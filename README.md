@@ -32,12 +32,13 @@ Arguments:
 
 Use `fb-post` to post a forecast set to the relevant GCS bucket. Example usage:
 ```bash
-make fb-post file_prefix="srfb_demo" question_set="2025-08-03-llm" organization="Stochastic Radiant" N=1 upload_to_gcs=False
+make fb-post file_prefix="srfb_demo" question_set="2025-08-03-llm" organization="Stochastic Radiant" N=1 upload_to_gcs=True
 ```
 - `file_prefix`: Identifier for the forecast files (e.g., "srfb_demo")
 - `question_set`: Name of the question set being forecasted (e.g., "2025-08-03-llm") 
 - `organization`: Your organization name (for the ForecastBench leaderboard)
 - `N`: the submission number (integer)
+- `upload_to_gcs`: Whether to upload the submission to Google Cloud Storage (True/False). If False, only creates a local copy.
 
 ## Contributions
 Please contact me if you're interested in contributing. These submission tools and Stochastic Radiant are both in active development.
