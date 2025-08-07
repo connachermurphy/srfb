@@ -1,9 +1,9 @@
-import json
 import os
+import subprocess
 import sys
+import urllib.parse
 
 import dotenv
-from google.cloud import storage
 
 dotenv.load_dotenv()
 
@@ -27,31 +27,50 @@ command_line_args = dict(zip(command_line_args_expected, command_line_args_provi
 
 forecast_due_date = command_line_args["question_set"].replace("-llm", "")
 
-# Load the submission file
-with open(
-    f"{FORECAST_DIR}/submission_{command_line_args['file_prefix']}_{command_line_args['question_set']}.json",
-    "r",
-) as f:
-    submission = json.load(f)
+submission_path = f"{FORECAST_DIR}/submission_{command_line_args['file_prefix']}_{command_line_args['question_set']}.json"
 
 # Post to GCS bucket
-bucket_name = f"forecastbench-submissions/{forecast_due_date}/{GCS_BUCKET_NAME}"
-bucket_path = f"{forecast_due_date}.{command_line_args['organization']}.{command_line_args['N']}.json"
+sub_bucket_name = f"{forecast_due_date}/{GCS_BUCKET_NAME}"
+filename = f"{forecast_due_date}.{command_line_args['organization']}.{command_line_args['N']}.json"
+filename_full = f"{sub_bucket_name}/{filename}"
+encoded_filename_full = urllib.parse.quote(filename_full, safe="/")
 
 command_line_args["upload_to_gcs"] = (
     command_line_args["upload_to_gcs"].lower() == "true"
 )
 
 if command_line_args["upload_to_gcs"]:
-    print(f"Uploading to {bucket_name}/{bucket_path}")
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(bucket_path)
-    blob.upload_from_string(json.dumps(submission))
-else:
-    print(f"Saving to {FORECAST_DIR}/{bucket_path}")
-    with open(
-        f"{FORECAST_DIR}/{forecast_due_date}.{command_line_args['organization']}.{command_line_args['N']}.json",
-        "w",
-    ) as f:
-        json.dump(submission, f)
+    print("Uploading to GCS")
+
+    token = subprocess.check_output(
+        ["gcloud", "auth", "print-access-token"], text=True
+    ).strip()
+    url = f"https://storage.googleapis.com/upload/storage/v1/b/forecastbench-submissions/o?uploadType=media&name={encoded_filename_full}"
+
+    subprocess.run(
+        [
+            "curl",
+            "-X",
+            "POST",
+            "-H",
+            f"Authorization: Bearer {token}",
+            "-H",
+            "Content-Type: application/json",
+            "--data-binary",
+            f"@{submission_path}",
+            url,
+        ],
+        check=True,
+    )
+
+
+# Create a local copy with the appropriate name
+local_submission_path = f"{FORECAST_DIR}/{filename}"
+
+subprocess.run(
+    [
+        "cp",
+        submission_path,
+        local_submission_path,
+    ],
+)
