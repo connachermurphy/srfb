@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "google-cloud-storage>=3.2.0",
     "requests>=2.32.4",
     "stochastic-radiant",
     "tqdm>=4.67.1",
