@@ -7,7 +7,7 @@ from stochastic_radiant.forecaster import Forecaster
 from tqdm import tqdm
 
 from utils.forecasts import build_context, find_all_forecasts, update_file
-from utils.questions import get_latest_question_set, get_question_count
+from utils.questions import get_question_count, get_question_set
 
 dotenv.load_dotenv()
 
@@ -24,6 +24,7 @@ BOOLEAN_COMBOS = [
 command_line_args_expected = [
     "file_prefix",
     "model",
+    "question_set_name",
 ]
 command_line_args_provided = sys.argv[1:]
 
@@ -43,11 +44,12 @@ with open(
 forecaster = Forecaster(model=command_line_args["model"], api_key=ANTHROPIC_API_KEY)
 
 # Query GitHub for the latest question set object
-latest_question_set = get_latest_question_set()
+# latest_question_set = get_latest_question_set()
+question_set = get_question_set(command_line_args["question_set_name"])
 
 # Extract metadata
-due_date = latest_question_set["forecast_due_date"]
-question_set_name = latest_question_set["question_set"]
+due_date = question_set["forecast_due_date"]
+question_set_name = question_set["question_set"]
 question_set_name_no_json = question_set_name.replace(".json", "")
 
 print(f"Forecast due date: {due_date} ({question_set_name_no_json})")
@@ -73,7 +75,7 @@ num_forecasts = len(forecasts)
 print(f"Number of forecasts before running: {num_forecasts}")
 
 # Extract the question set
-questions = latest_question_set["questions"]
+questions = question_set["questions"]
 num_questions = len(questions)
 
 # Save interval
@@ -85,6 +87,7 @@ for i in tqdm(range(num_questions)):
 
     question = questions[i]
     question_id = question["id"]
+
     num_resolution_dates, num_combinations = get_question_count(question)
 
     if num_resolution_dates == 1:
